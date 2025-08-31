@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRPCIV Învățare DEMO Complet</title>
+<style>
+body { font-family: Arial, sans-serif; padding: 20px; }
+button { margin-top: 5px; padding: 5px 10px; }
+input[type=text] { padding: 5px; width: 100%; margin-bottom: 10px; }
+ul { list-style: none; padding: 0; }
+li { cursor: pointer; padding: 8px; margin-bottom: 5px; border: 1px solid #ccc; border-radius: 5px; display: flex; align-items: center; gap: 5px; }
+li.correct { border-color: #2ecc71; background: #ecf9f1; }
+li.incorrect { border-color: #e74c3c; background: #fff2f2; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<!-- React + ReactDOM -->
+<script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel">
+
+const DEMO_QUESTIONS = [
+  { id: "q001", text: "Ce trebuie să faci când vezi marcajul de trecere pentru pietoni? (alege toate)", answers: [
+      { id: "a", text: "Reduc viteza și mă apropii cu prudență.", correct: true },
+      { id: "b", text: "Acord prioritate pietonilor angajați în traversare.", correct: true },
+      { id: "c", text: "Claxonez continuu pentru a grăbi traversarea.", correct: false },
+      { id: "d", text: "Oprești doar dacă pietonul este deja pe carosabil.", correct: false }
+    ], explanation: "La trecerile semnalizate trebuie reducerea vitezei și acordarea priorității pietonilor." },
+
+  { id: "q002", text: "Când sunt permise luminile de ceață? (alege toate)", answers: [
+      { id: "a", text: "În ceață densă care reduce vizibilitatea.", correct: true },
+      { id: "b", text: "Când plouă torențial și vizibilitatea este redusă.", correct: true },
+      { id: "c", text: "Pe timp senin, pe autostradă pentru mai mult confort.", correct: false }
+    ], explanation: "Luminile de ceață se folosesc când vizibilitatea este semnificativ redusă." },
+
+  { id: "q003", text: "La semnalul roșu al semaforului ce obligații ai? (alege toate)", answers: [
+      { id: "a", text: "Oprire înaintea marcajului de oprire.", correct: true },
+      { id: "b", text: "Aștept semnalul verde înainte de a porni.", correct: true },
+      { id: "c", text: "Pot trece dacă drumul e liber și nu sunt pietoni.", correct: false }
+    ], explanation: "Roșu înseamnă oprire; nu se trece până la verde." },
+
+  { id: "q004", text: "Ce măsuri iei atunci când un vehicul de urgență (ambulanță) se apropie cu semnale luminoase și sonore? (alege toate)", answers: [
+      { id: "a", text: "Fac loc, mă opresc sau mă bag cât mai mult la dreapta.", correct: true },
+      { id: "b", text: "Continui pentru a nu bloca intersecția.", correct: false },
+      { id: "c", text: "Nu blochez traiectoria vehiculului de urgență.", correct: true }
+    ], explanation: "Vehiculele de urgență au prioritate; facilităm trecerea lor." },
+
+  { id: "q005", text: "Ce obligații ai la întâlnirea cu un tramvai? (alege toate)", answers: [
+      { id: "a", text: "Nu depășesc tramvaiul angajat în stație dacă sunt pietoni.", correct: true },
+      { id: "b", text: "Acord prioritate tramvaiului în anumite situații.", correct: true },
+      { id: "c", text: "Depășesc imediat pe partea dreaptă indiferent de marcaj.", correct: false }
+    ], explanation: "Tramvaiul are reguli speciale; trebuie prudență la stații și la depășiri." },
+
+  { id: "q006", text: "În care situații folosești semnalizarea cu mâna? (alege toate)", answers: [
+      { id: "a", text: "Când semnalul luminos nu funcționează.", correct: true },
+      { id: "b", text: "Ca supliment la semnalizarea normală pentru a fi mai vizibil.", correct: true },
+      { id: "c", text: "În tunel în care semnalizarea e interzisă.", correct: false }
+    ], explanation: "Semnalizarea manuală este folosită când e nevoie de claritate sau când semnalele lumine nu funcționează." },
+
+  { id: "q007", text: "Ce reguli există pentru transportul copiilor? (alege toate)", answers: [
+      { id: "a", text: "Copiii mici trebuie transportați în scaune speciale adecvate greutății.", correct: true },
+      { id: "b", text: "Este permis ca un copil sub 12 ani să stea în față fără sistem de reținere.", correct: false },
+      { id: "c", text: "Trebuie folosite centuri de siguranță pentru toți pasagerii pe locuri prevăzute.", correct: true }
+    ], explanation: "Sisteme de reținere și centuri sunt obligatorii pentru protecția copiilor." },
+
+  { id: "q008", text: "Care sunt interdicțiile la depășire? (alege toate)", answers: [
+      { id: "a", text: "Depășirea pe trecerea pentru pietoni este interzisă.", correct: true },
+      { id: "b", text: "Depășirea în curbă fără vizibilitate este interzisă.", correct: true },
+      { id: "c", text: "Depășirea în afara localității pe drum cu două benzi e mereu permisă.", correct: false }
+    ], explanation: "Depășirile periculoase sau în zone fără vizibilitate sunt interzise." },
+
+  { id: "q009", text: "Ce faci dacă anvelopele pierd aderența pe carosabil alunecos? (alege toate)", answers: [
+      { id: "a", text: "Reduc treptat viteza, evit frânarea bruscă.", correct: true },
+      { id: "b", text: "Direcționez volanul spre derapare pentru a controla direcția.", correct: true },
+      { id: "c", text: "Frânez tare și trag de volan în direcția opusă imediat.", correct: false }
+    ], explanation: "Controlul direcției și reducerea treptată a vitezei sunt esențiale pe carosabil alunecos." },
+
+  { id: "q010", text: "La ce folosesc marcajele longitudinale duble continue? (alege toate)", answers: [
+      { id: "a", text: "Interzic depășirea și schimbarea benzii.", correct: true },
+      { id: "b", text: "Separă fluxuri de sensuri diferite sau benzi în care manevre sunt interzise.", correct: true },
+      { id: "c", text: "Sunt doar decorative și pot fi traversate.", correct: false }
+    ], explanation: "Linia continuă dubla indică interdicții clare la schimbarea benzii și depășire." }
+
+  // Poți continua adăugarea întrebărilor până la q030+ în același format
+];
+
+function onlyMultiAnswer(items) {
+  return items.filter((q) => q.answers.filter(a => a.correct).length >= 2);
+}
+
+function App() {
+  const [index, setIndex] = React.useState(0);
+  const [selected, setSelected] = React.useState({});
+  const [showAnswer, setShowAnswer] = React.useState(false);
+  const data = onlyMultiAnswer(DEMO_QUESTIONS);
+  const item = data[index];
+
+  function toggleSelect(id) {
+    if(showAnswer) return;
+    setSelected(prev => ({ ...prev, [id]: !prev[id] }));
+  }
+
+  function check() {
+    setShowAnswer(true);
+  }
+
+  function next() {
+    setSelected({});
+    setShowAnswer(false);
+    setIndex(i => Math.min(i + 1, data.length - 1));
+  }
+
+  function prev() {
+    setSelected({});
+    setShowAnswer(false);
+    setIndex(i => Math.max(i - 0, 0));
+  }
+
+  if(!item) return <div>Nu există întrebări disponibile.</div>;
+
+  return (
+    <div>
+      <h1>Învățare DRPCIV DEMO Complet</h1>
+      <div style={{ marginBottom: 10 }}>
+        <button onClick={prev} disabled={index===0}>← Prev</button>
+        <span style={{ margin: '0 10px' }}>Întrebarea {index+1} / {data.length}</span>
+        <button onClick={next} disabled={index===data.length-1}>Next →</button>
+      </div>
+      <div style={{ marginBottom: 10, fontWeight: 'bold' }}>{item.text}</div>
+      <ul>
+        {item.answers.map(a => {
+          const chosen = !!selected[a.id];
+          const className = showAnswer ? (a.correct ? 'correct' : chosen ? 'incorrect' : '') : '';
+          return (
+            <li key={a.id} onClick={()=>toggleSelect(a.id)} className={className}>
+              <input type="checkbox" checked={chosen} readOnly /> {a.text}
+            </li>
+          )
+        })}
+      </ul>
+      {!showAnswer ? <button onClick={check} disabled={!Object.values(selected).some(Boolean)}>Verifică</button> : 
+        <div style={{ marginTop: 10, background: '#f0f0f0', padding: 10, borderRadius: 5 }}>
+          <b>Explicație:</b> {item.explanation}
+        </div>
+      }
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+
+</script>
+</body>
+</html>
